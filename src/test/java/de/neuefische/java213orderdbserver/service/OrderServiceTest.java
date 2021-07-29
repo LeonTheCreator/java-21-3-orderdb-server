@@ -25,7 +25,7 @@ class OrderServiceTest {
         OrderRepository orderRepository = new OrderRepository();
         ProductRepository productRepository = new ProductRepository();
         ProductService productService = new ProductService(productRepository);
-        OrderService orderService = new OrderService(productService, orderRepository);
+        OrderService orderService = new OrderService(productService, orderRepository, createId);
 
         try {
             //When
@@ -45,7 +45,7 @@ class OrderServiceTest {
         when(productServiceMock.getProductById("A"))
                 .thenReturn(Optional.of(new Product("A", "product id=1 of mocked service call")));
 
-        OrderService orderService = new OrderService(productServiceMock, new OrderRepository());
+        OrderService orderService = new OrderService(productServiceMock, new OrderRepository(), createId);
 
         try {
             //When
@@ -67,7 +67,7 @@ class OrderServiceTest {
         when(productServiceMock.getProductById("A"))
                 .thenReturn(Optional.of(new Product("A", "product id=1 of mocked service call")));
 
-        OrderService orderService = new OrderService(productServiceMock, orderRepositoryMock);
+        OrderService orderService = new OrderService(productServiceMock, orderRepositoryMock, createId);
 
         //When
         orderService.addOrder(List.of("A"));
@@ -75,4 +75,22 @@ class OrderServiceTest {
         // THEN
         verify(orderRepositoryMock).addOrder(any());
     }
+    @Test
+    @DisplayName("Test if Id is created?")
+    public void testCreatingIdMockito() {
+        //Given
+        CreateId createIdMock = mock(CreateId.class);
+        when(createIdMock.idCreator())
+                .thenReturn(any());
+
+        OrderService orderService = new OrderService(productServiceMock, new OrderRepository(), createId);
+
+        try {
+            //When
+            orderService.addOrder(List.of("A", "B"));
+            fail();
+        } catch (IllegalArgumentException actual) {
+            //Then
+            assertEquals("Product with ID B does not exist", actual.getMessage());
+        }
 }

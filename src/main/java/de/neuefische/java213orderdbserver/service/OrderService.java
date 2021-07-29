@@ -8,18 +8,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class OrderService {
 
     private final ProductService productService;
     private final OrderRepository orderRepository;
+    private final CreateId createId;
 
     @Autowired
-    public OrderService(ProductService productService, OrderRepository orderRepository) {
+    public OrderService(ProductService productService, OrderRepository orderRepository, CreateId createId) {
         this.productService = productService;
         this.orderRepository = orderRepository;
+        this.createId = createId;
     }
 
     public Order addOrder(List<String> productIds) {
@@ -29,9 +30,11 @@ public class OrderService {
                     .orElseThrow(() -> new IllegalArgumentException("Product with ID " + productId + " does not exist"));
             productsToOrder.add(product);
         }
-        String id = UUID.randomUUID().toString();
+
+        String id = createId.idCreator();
         Order order = new Order(id, productsToOrder);
         return orderRepository.addOrder(order);
+
     }
 
     public List<Order> getAllOrders() {
